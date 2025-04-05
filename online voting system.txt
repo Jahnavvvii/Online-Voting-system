@@ -1,0 +1,165 @@
+import streamlit as st
+import hashlib
+
+# Initialize voter data (Example voters with hashed PINs)
+import hashlib
+
+voters = {
+    "12345": {
+        "name": "Pujitha",
+        "date_of_birth": "1990-01-01",
+        "address": "INDIA",
+        "pin_hash": hashlib.sha256("password123".encode()).hexdigest()
+    },
+    "67890": {
+        "name": "Yukhtha",
+        "date_of_birth": "1995-06-01",
+        "address": "INDIA",
+        "pin_hash": hashlib.sha256("securepin456".encode()).hexdigest()
+    },
+    "23456": {
+        "name": "Ankit",
+        "date_of_birth": "1988-04-15",
+        "address": "INDIA",
+        "pin_hash": hashlib.sha256("ankit123".encode()).hexdigest()
+    },
+    "34567": {
+        "name": "Ravi",
+        "date_of_birth": "1992-11-05",
+        "address": "INDIA",
+        "pin_hash": hashlib.sha256("ravipin789".encode()).hexdigest()
+    },
+    "45678": {
+        "name": "Ajay",
+        "date_of_birth": "1985-03-22",
+        "address": "INDIA",
+        "pin_hash": hashlib.sha256("ajay@321".encode()).hexdigest()
+    },
+    "56789": {
+        "name": "Sumit",
+        "date_of_birth": "1991-07-18",
+        "address": "INDIA",
+        "pin_hash": hashlib.sha256("sumit@456".encode()).hexdigest()
+    },
+    "67891": {
+        "name": "Vikash",
+        "date_of_birth": "1993-02-28",
+        "address": "INDIA",
+        "pin_hash": hashlib.sha256("vikash@567".encode()).hexdigest()
+    },
+    "78902": {
+        "name": "Naveen",
+        "date_of_birth": "1990-09-12",
+        "address": "INDIA",
+        "pin_hash": hashlib.sha256("naveen1234".encode()).hexdigest()
+    },
+    "89012": {
+        "name": "Ramesh",
+        "date_of_birth": "1987-08-19",
+        "address": "INDIA",
+        "pin_hash": hashlib.sha256("ramesh@901".encode()).hexdigest()
+    },
+    "90123": {
+        "name": "Suresh",
+        "date_of_birth": "1992-12-14",
+        "address": "INDIA",
+        "pin_hash": hashlib.sha256("suresh@789".encode()).hexdigest()
+    }
+    # Repeat this structure for more members...
+}
+
+# Updated candidates list with party names
+candidates = {
+    "Aam Aadmi Party": "AAP",
+    "Bahujan Samaj Party": "BSP",
+    "Bharatiya Janata Party": "BJP",
+    "Communist Party of India (Marxist)": "CPI(M)",
+    "Indian National Congress": "INC",
+    "National People's Party": "NPP"
+}
+
+# Manage session state for navigation
+if "voter_id" not in st.session_state:
+    st.session_state.voter_id = None
+if "verified" not in st.session_state:
+    st.session_state.verified = False
+if "vote_cast" not in st.session_state:
+    st.session_state.vote_cast = False
+
+def login_page():
+    """Login Page"""
+    st.title("Login Page")
+    voter_id = st.text_input("Enter your ID-card or Mobile-ID")
+    pin = st.text_input("Enter your PIN code", type="password")
+
+    if st.button("Login"):
+        if voter_id in voters:
+            entered_pin_hash = hashlib.sha256(pin.encode()).hexdigest()
+            if entered_pin_hash == voters[voter_id]["pin_hash"]:
+                st.session_state.voter_id = voter_id
+                st.success("Login successful! Proceed to verification.")
+            else:
+                st.error("Invalid PIN. Please try again.")
+        else:
+            st.error("Invalid voter ID. Please check your credentials.")
+
+def voter_verification_page():
+    """Voter Verification Page"""
+    if not st.session_state.voter_id:
+        st.warning("Please log in first.")
+        return
+
+    st.title("Voter Verification Page")
+    st.write("Voter Details:")
+    st.write(voters[st.session_state.voter_id])
+
+    verification_code = st.text_input("Enter verification code sent to your phone or email")
+
+    if st.button("Verify"):
+        if verification_code == "12345":  # Replace with actual verification logic
+            st.session_state.verified = True
+            st.success("Verification successful! Proceed to voting.")
+        else:
+            st.error("Invalid verification code")
+
+def voting_page():
+    """Voting Page"""
+    if not st.session_state.verified:
+        st.warning("Please complete verification first.")
+        return
+
+    st.title("Voting Page")
+    st.write("Select the party you wish to vote for:")
+
+    selected_party = st.selectbox("Choose a party", list(candidates.keys()))
+
+    if st.button("Cast Vote"):
+        st.session_state.vote_cast = True
+        st.success(f"Vote cast successfully for {selected_party} ({candidates[selected_party]})! Proceed to confirmation.")
+
+def confirmation_page():
+    """Confirmation Page"""
+    if not st.session_state.vote_cast:
+        st.warning("Please cast your vote first.")
+        return
+
+    st.title("Confirmation Page")
+    st.write("✅ *Your vote has been successfully cast.*")
+    st.write("🗳 *Vote Receipt:* You can print or save this receipt for your records.")
+
+def main():
+    """Navigation Logic"""
+    st.sidebar.title("Navigation")
+    page = st.sidebar.radio("Go to", ["Login", "Verification", "Voting", "Confirmation"])
+
+    if page == "Login":
+        login_page()
+    elif page == "Verification":
+        voter_verification_page()
+    elif page == "Voting":
+        voting_page()
+    elif page == "Confirmation":
+        confirmation_page()
+
+if _name_ == "_main_":
+    main()
